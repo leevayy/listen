@@ -6,7 +6,9 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
+	"voicebook/internal/s3client"
 	"voicebook/internal/storage"
 
 	"github.com/google/uuid"
@@ -16,10 +18,11 @@ import (
 
 type Handler struct {
 	st *storage.Storage
+	cl *s3client.Client
 }
 
-func New(st *storage.Storage) *Handler {
-	return &Handler{st: st}
+func New(st *storage.Storage, cl *s3client.Client ) *Handler {
+	return &Handler{st: st, cl: cl}
 }
 
 type PostBookRequest struct {
@@ -87,7 +90,7 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// books handlers
+// book handlers
 func (h *Handler) GetBook(w http.ResponseWriter, r *http.Request) {
 	login := r.Context().Value("login").(string)
 
@@ -110,19 +113,38 @@ func (h *Handler) GetBook(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) PostBook(w http.ResponseWriter, r *http.Request) {
     login := r.Context().Value("login").(string)
 
-    var req PostBookRequest
-    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-        http.Error(w, "invalid request body", http.StatusBadRequest)
+    if err := r.ParseMultipartForm(10 << 20); err != nil { // 10 MB max
+        http.Error(w, "failed to parse multipart form", http.StatusBadRequest)
         return
     }
 
-	book, err := h.st.AddBook(login, "", req.BookTitle)
-	if err != nil {
-		fmt.Printf("AddBook failed", err)
-		http.Error(w, "failed to add book", http.StatusInternalServerError)
-		return
-	}
+    file, header, err := r.FormFile("file")
+    if err != nil {
+        http.Error(w, "file is required", http.StatusBadRequest)
+        return
+    }
 
+    bookTitle := r.FormValue("bookTitle")
+    if bookTitle == "" {
+        http.Error(w, "bookTitle is required", http.StatusBadRequest)
+        return
+    }
+	
+    url, err := h.cl.UploadFile(r.Context(), file, header.Filename)
+    if err != nil {
+        fmt.Println("Upload to S3 failed:", err)
+        http.Error(w, "failed to upload file", http.StatusInternalServerError)
+        return
+    }
+
+    book, err := h.st.AddBook(login, url, bookTitle)
+    if err != nil {
+        fmt.Println("AddBook failed:", err)
+        http.Error(w, "failed to add book", http.StatusInternalServerError)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(map[string]any{"book": book})
 }
 
@@ -136,9 +158,21 @@ func (h *Handler) DeleteBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	book, err := h.st.GetBook(bookID, login)
+	if err != nil {
+		http.Error(w, "invalid bookId", http.StatusBadRequest)
+		return
+	}
+	fileName := strings.Split(book.BookUrl, "uploads/")[1]
+
+	err = h.cl.DeleteFile(r.Context(), fileName)
+	if err != nil {
+		http.Error(w, "failed to delete book from s3", http.StatusBadRequest)
+		return
+	}
 	err = h.st.DeleteBook(bookID, login)
 	if err != nil {
-		http.Error(w, "failed to delete book", http.StatusInternalServerError)
+		http.Error(w, "failed to delete book from postgres", http.StatusInternalServerError)
 		return
 	}
 

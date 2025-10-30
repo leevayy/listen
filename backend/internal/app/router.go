@@ -13,7 +13,6 @@ import (
 
 func NewRouter(h *handler.Handler, logger *slog.Logger) http.Handler {
 	r := chi.NewRouter()
-
 	// Logging middleware — можно оставлять здесь (до Route)
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -31,6 +30,16 @@ func NewRouter(h *handler.Handler, logger *slog.Logger) http.Handler {
 				"path", r.URL.Path,
 				"duration_ms", time.Since(start).Milliseconds(),
 			)
+		})
+	})
+
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			path := r.URL.Path
+			if path[len(path)-1] != '/' {
+				r.URL.Path = path + "/"
+			}
+			next.ServeHTTP(w, r)
 		})
 	})
 
@@ -55,22 +64,21 @@ func NewRouter(h *handler.Handler, logger *slog.Logger) http.Handler {
 
 	r.Route("/api", func(r chi.Router) {
 		// public endp
-		r.Post("/register", h.Register)
-		r.Post("/login", h.Login)
+		r.Post("/register/", h.Register)
+		r.Post("/login/", h.Login)
 		
 
 		// private endp
 		r.Group(func(r chi.Router) {
 			r.Use(h.AuthMiddleware)
-			r.Get("/collection", h.GetCollection)
-			r.Get("/myself", h.Myself)
-			r.Post("/logout", h.Logout)
-			r.Post("/book", h.PostBook)
+			r.Get("/collection/", h.GetCollection)
+			r.Get("/myself/", h.Myself)
+			r.Post("/logout/", h.Logout)
+			r.Post("/book/", h.PostBook)
 
 			r.Route("/book/{bookId}", func(r chi.Router) {
 				r.Get("/", h.GetBook)
 				r.Delete("/", h.DeleteBook)
-
 			})
 		})
 	})

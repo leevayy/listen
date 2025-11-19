@@ -5,9 +5,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# ffmpeg for pydub/speechkit
+# ffmpeg for pydub/speechkit + build tools for native wheels
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ffmpeg \
+    && apt-get install -y --no-install-recommends \
+        ffmpeg \
+        build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies

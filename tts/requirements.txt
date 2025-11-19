@@ -7,3 +7,7 @@ speechkit
 
 # Python 3.13+ dropped audioop; this provides a compatible replacement
 audioop-lts; python_version >= "3.13"
+
+# Avoid building from source: use prebuilt wheels for grpc
+grpcio==1.62.2
+grpcio-tools==1.62.2

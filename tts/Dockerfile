@@ -10,13 +10,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Install uv (static binary) from Astral's container image.
 COPY --from=ghcr.io/astral-sh/uv:0.8.6 /uv /uvx /usr/local/bin/
 
-# Copy dependency metadata first for better layer caching.
-COPY pyproject.toml uv.lock ./
+# This Dockerfile is typically built from the repo root as context:
+#   docker build -f tts/Dockerfile .
+# So dependency files live under tts/ in the build context.
+COPY tts/pyproject.toml tts/uv.lock ./
 
 RUN uv sync --frozen --no-dev
 
-# Copy the rest of the application.
-COPY . .
+# Copy only the TTS app sources into the image.
+COPY tts/ ./
 
 EXPOSE 8000
 

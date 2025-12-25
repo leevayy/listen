@@ -1,16 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"net/http"
 	"log/slog"
-    "fmt"
+	"net/http"
+	"os"
 	"voicebook/internal/app"
-)
-
-const (
-	host = "127.0.0.1"
-	port = "8080"
 )
 
 func main() {
@@ -20,9 +16,18 @@ func main() {
 		log.Fatalf("failed to init app: %v", err)
 	}
 
-    addr := fmt.Sprintf("%s:%s", host, port)
+	host := getenv("HOST", "0.0.0.0")
+	port := getenv("PORT", "8080")
+	addr := fmt.Sprintf("%s:%s", host, port)
 	log.Printf("Server started on %s", addr)
 	if err := http.ListenAndServe(addr, a.Router); err != nil {
 		log.Fatalf("server stopped: %v", err)
 	}
+}
+
+func getenv(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
 }

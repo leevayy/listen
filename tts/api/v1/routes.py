@@ -5,4 +5,4 @@ router = APIRouter()
 
 router.post("/tts")(tts)
 
-router.get("/ping")(lambda: "pong")
+router.get("/ping")(lambda: { "status": "ok" })

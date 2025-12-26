@@ -36,7 +36,6 @@ export const Book: React.FC<BookProps> = ({
   const [fontSize, setFontSize] = useState(18);
   const [lineHeight, setLineHeight] = useState(1.8);
   
-  
   const contentRef = useRef<HTMLDivElement>(null);
   const scrollIntervalRef = useRef<number | null>(null);
 

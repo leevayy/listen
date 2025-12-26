@@ -8,7 +8,7 @@ import {
 import styles from "./Collection.module.css";
 import { useState } from "react";
 import { observer } from "mobx-react";
-import { bookStore } from "../../store/bookStore";
+import { bookStore } from "../../store/BookStore";
 
 type Props = {};
 

@@ -18,7 +18,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY --from=build /app/package.json /app/package-lock.json ./
-RUN npm ci --omit=dev
+RUN npm ci
 
 COPY --from=build /app/dist ./dist
 

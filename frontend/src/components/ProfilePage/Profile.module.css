@@ -1,0 +1,110 @@
+.profileContainer {
+  flex: 1;
+  width: 100%;
+}
+
+.profileContent {
+  flex: 1;
+  min-height: 0;
+}
+
+.mainInfoCard {
+  padding: 24px;
+  flex: 2;
+  min-width: 300px;
+  min-height: 500px;
+}
+
+.statsColumn {
+  flex: 1;
+  min-width: 300px;
+}
+
+.avatar {
+  border: 3px solid var(--g-color-line-brand);
+}
+
+.contactsCard {
+  padding: 16px;
+  margin-top: 8px;
+  background-color: var(--g-color-base-background);
+}
+
+.contactsTitle {
+  margin-bottom: 12px;
+}
+
+.contactLabel {
+  min-width: 100px;
+  color: var(--g-color-text-secondary);
+}
+
+.contactInput {
+  flex: 1;
+}
+
+.statsCard {
+  padding: 20px;
+  flex-shrink: 0;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.statItem {
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.statNumber {
+  color: var(--g-color-text-brand);
+  margin-bottom: 4px;
+}
+
+.genreSelect {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.actionsCard {
+  padding: 20px;
+  flex-shrink: 0;
+}
+
+.settingsCard {
+  padding: 20px;
+  flex-shrink: 0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .profileContent {
+    flex-direction: column;
+  }
+  
+  .mainInfoCard {
+    min-height: auto;
+  }
+  
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .contactLabel {
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}

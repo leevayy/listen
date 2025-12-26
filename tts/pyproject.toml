@@ -1,0 +1,15 @@
+[project]
+name = "tts"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "audioop-lts>=0.2.2",
+    "boto3>=1.42.16",
+    "fastapi>=0.127.0",
+    "pydub>=0.25.1",
+    "python-dotenv>=1.2.1",
+    "uvicorn[standard]>=0.30.0",
+    "yandex-speechkit>=1.5.0",
+]

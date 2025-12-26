@@ -7,6 +7,7 @@ import { userStore } from "../store";
 import { pages } from "../pages/pages";
 import { useEffect } from "react";
 
+
 export const App: React.FC = observer(() => {
     const { authLogin: login } = userStore;
     const navigate = useNavigate();

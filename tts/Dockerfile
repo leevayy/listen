@@ -1,24 +1,26 @@
-FROM python:3.12-slim
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+FROM python:3.13-slim
 
 WORKDIR /app
 
-# ffmpeg for pydub/speechkit + build tools for native wheels
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        ffmpeg \
-        build-essential \
-    && rm -rf /var/lib/apt/lists/*
+ENV PYTHONDONTWRITEBYTECODE=1 \
+	PYTHONUNBUFFERED=1 \
+	UV_PROJECT_ENVIRONMENT=/app/.venv \
+	PATH=/app/.venv/bin:$PATH
 
-# Install dependencies
-COPY tts/requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
+# Install uv (static binary) from Astral's container image.
+COPY --from=ghcr.io/astral-sh/uv:0.8.6 /uv /uvx /usr/local/bin/
 
-# Copy application
-COPY tts/ /app/tts/
+# This Dockerfile is typically built from the repo root as context:
+#   docker build -f tts/Dockerfile .
+# So dependency files live under tts/ in the build context.
+COPY tts/pyproject.toml tts/uv.lock ./
+
+RUN uv sync --frozen --no-dev
+
+# Copy only the TTS app sources into the image.
+COPY tts/ ./
 
 EXPOSE 8000
 
-CMD ["uvicorn", "tts.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run without reload in containers.
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

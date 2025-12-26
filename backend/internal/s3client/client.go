@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"mime/multipart"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -60,14 +60,7 @@ func New() (*Client, error) {
 	}, nil
 }
 
-func (c *Client) UploadFile(ctx context.Context, file multipart.File, filename string) (string, error) {
-	defer file.Close()
-
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return "", err
-	}
-
+func (c *Client) UploadFile(ctx context.Context, data []byte, filename string) (string, error) {
 	key := fmt.Sprintf("uploads/%s", filename)
 
 	output, err := c.svc.PutObject(ctx, &s3.PutObjectInput{
@@ -84,6 +77,24 @@ func (c *Client) UploadFile(ctx context.Context, file multipart.File, filename s
 	fmt.Println(url)
 
 	return url, nil
+}
+
+
+func (c *Client) DownloadFile(ctx context.Context, url string) ([]byte, error) {
+    // извлекаем ключ из url
+    parts := strings.Split(url, "/")
+    key := strings.Join(parts[len(parts)-2:], "/") // uploads/filename
+
+    output, err := c.svc.GetObject(ctx, &s3.GetObjectInput{
+        Bucket: &c.bucket,
+        Key:    &key,
+    })
+    if err != nil {
+        return nil, err
+    }
+    defer output.Body.Close()
+
+    return io.ReadAll(output.Body)
 }
 
 func (c *Client) DeleteFile(ctx context.Context, filename string) error {

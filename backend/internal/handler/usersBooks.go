@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"strconv"
 	"strings"
 
@@ -19,7 +20,13 @@ import (
 type Handler struct {
 	st *storage.Storage
 	cl *s3client.Client
+	Mock *httptest.Server
 }
+
+type Config struct {
+	TTSBaseURL string
+}
+
 
 func New(st *storage.Storage, cl *s3client.Client ) *Handler {
 	return &Handler{st: st, cl: cl}
@@ -90,7 +97,6 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// book handlers
 func (h *Handler) GetBook(w http.ResponseWriter, r *http.Request) {
 	login := r.Context().Value("login").(string)
 
@@ -111,42 +117,53 @@ func (h *Handler) GetBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) PostBook(w http.ResponseWriter, r *http.Request) {
-    login := r.Context().Value("login").(string)
+	login := r.Context().Value("login").(string)
 
-    if err := r.ParseMultipartForm(10 << 20); err != nil { // 10 MB max
-        http.Error(w, "failed to parse multipart form", http.StatusBadRequest)
-        return
-    }
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		http.Error(w, "failed to parse multipart form", http.StatusBadRequest)
+		return
+	}
 
-    file, header, err := r.FormFile("file")
-    if err != nil {
-        http.Error(w, "file is required", http.StatusBadRequest)
-        return
-    }
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "file is required", http.StatusBadRequest)
+		return
+	}
 
-    bookTitle := r.FormValue("bookTitle")
-    if bookTitle == "" {
-        http.Error(w, "bookTitle is required", http.StatusBadRequest)
-        return
-    }
-	
-    url, err := h.cl.UploadFile(r.Context(), file, header.Filename)
-    if err != nil {
-        fmt.Println("Upload to S3 failed:", err)
-        http.Error(w, "failed to upload file", http.StatusInternalServerError)
-        return
-    }
+	bookTitle := r.FormValue("bookTitle")
+	if bookTitle == "" {
+		http.Error(w, "bookTitle is required", http.StatusBadRequest)
+		return
+	}
+	bookAuthor := r.FormValue("author")
+	if bookTitle == "" {
+		http.Error(w, "bookAuthor is required", http.StatusBadRequest)
+		return
+	}
+	data, err := io.ReadAll(file)
+	if err != nil {
+		http.Error(w, "failed to read file", http.StatusInternalServerError)
+		return
+	}
 
-    book, err := h.st.AddBook(login, url, bookTitle)
-    if err != nil {
-        fmt.Println("AddBook failed:", err)
-        http.Error(w, "failed to add book", http.StatusInternalServerError)
-        return
-    }
+	url, err := h.cl.UploadFile(r.Context(), data, header.Filename)
+	if err != nil {
+		http.Error(w, "failed to upload file", http.StatusInternalServerError)
+		return
+	}
 
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(map[string]any{"book": book})
+	fullText := string(data)
+	book, err := h.st.AddBook(login, url, bookTitle, bookAuthor, fullText)
+	if err != nil {
+		fmt.Println("AddBook failed:", err)
+		http.Error(w, "failed to add book", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{"book": book})
 }
+
 
 
 func (h *Handler) DeleteBook(w http.ResponseWriter, r *http.Request) {

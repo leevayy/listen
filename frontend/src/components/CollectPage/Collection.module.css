@@ -1,0 +1,35 @@
+.wrapper {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 48px);
+}
+
+.bookList {
+  margin-top: 24px;
+}
+
+.bookCard {
+  padding: 20px;
+  border-radius: 12px;
+  background-color: var(--g-color-base-background);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.bookCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .wrapper {
+    padding: 16px;
+    min-height: calc(100vh - 32px);
+  }
+  
+  .bookCard {
+    padding: 16px;
+  }
+}

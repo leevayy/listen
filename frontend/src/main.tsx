@@ -8,6 +8,8 @@ import { createBrowserRouter, RouterProvider } from "react-router";
 import { ThemeProvider } from "@gravity-ui/uikit";
 import { ProfilePage } from "./pages/ProfilePage/ProfilePage.tsx";
 import { AuthPage } from "./pages/AuthPage/AuthPage.tsx";
+import { CollectPage} from "./pages/CollectPage/CollectPage.tsx";
+import { BookPage } from "./pages/BookPage/BookPage.tsx";
 
 const router = createBrowserRouter([
     {
@@ -21,6 +23,18 @@ const router = createBrowserRouter([
             {
                 path: "/profile",
                 element: <ProfilePage />,
+            },
+            {
+                path: "/collection",
+                element: <CollectPage />
+            },
+            {
+                path: "/book",
+                element: <BookPage />
+            },
+            {
+                path: "/profile",
+                element: <ProfilePage />
             }
         ]
     },

@@ -8,6 +8,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_API: ghcr.io/${{ github.repository_owner }}/listen-api
   IMAGE_TTS: ghcr.io/${{ github.repository_owner }}/listen-tts
+  IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/listen-frontend
 
 jobs:
   build:
@@ -43,6 +44,14 @@ jobs:
           file: backend/Dockerfile
           push: true
           tags: ${{ env.IMAGE_API }}:main
+
+      - name: Build & push Frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_FRONTEND }}:main
 
   deploy:
     needs: build

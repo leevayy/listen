@@ -22,11 +22,11 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable
-      YC_S3_API_KEY: ${YC_S3_API_KEY}
-      YC_S3_API_SECRET: ${YC_S3_API_SECRET}
-      YC_S3_BUCKET: ${YC_S3_BUCKET}
-      YC_S3_REGION: ${YC_S3_REGION}
-      YC_S3_ENDPOINT: ${YC_S3_ENDPOINT}
+      AWS_ACCESS_KEY_ID: ${YC_S3_API_KEY}
+      AWS_SECRET_ACCESS_KEY: ${YC_S3_API_SECRET}
+      AWS_BUCKET: ${YC_S3_BUCKET}
+      AWS_REGION: ${YC_S3_REGION}
+      AWS_ENDPOINT: ${YC_S3_ENDPOINT}
     ports:
       - "8080:8080"
     restart: unless-stopped

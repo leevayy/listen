@@ -1,0 +1,16 @@
+.wrapper {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .wrapper {
+    padding: 16px;
+    min-height: calc(100vh - 32px);
+  }
+}

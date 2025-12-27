@@ -10,10 +10,8 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-
 func NewRouter(h *handler.Handler, logger *slog.Logger) http.Handler {
 	r := chi.NewRouter()
-
 	// Logging middleware — можно оставлять здесь (до Route)
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -36,8 +34,18 @@ func NewRouter(h *handler.Handler, logger *slog.Logger) http.Handler {
 
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			path := r.URL.Path
+			if path[len(path)-1] != '/' {
+				r.URL.Path = path + "/"
+			}
+			next.ServeHTTP(w, r)
+		})
+	})
+
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			origin := r.Header.Get("Origin")
-			if origin == "http://127.0.0.1:5173" || origin == "http://localhost:5173" {
+			if origin == "http://127.0.0.1:5173" || origin == "http://localhost:5173" || origin == "http://158.160.73.166"{
 				w.Header().Set("Access-Control-Allow-Origin", origin)
 				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Session-Id")
@@ -55,21 +63,25 @@ func NewRouter(h *handler.Handler, logger *slog.Logger) http.Handler {
 
 	r.Route("/api", func(r chi.Router) {
 		// public endp
-		r.Post("/register", h.Register)
-		r.Post("/login", h.Login)
-		
+		r.Post("/register/", h.Register)
+		r.Post("/login/", h.Login)
 
 		// private endp
 		r.Group(func(r chi.Router) {
 			r.Use(h.AuthMiddleware)
-			r.Get("/collection", h.GetCollection)
-			r.Get("/myself", h.Myself)
-			r.Post("/logout", h.Logout)
-			r.Post("/book", h.PostBook)
+
+			r.Post("/player/finishedPage/", h.FinishedPage)
+			r.Get("/collection/", h.GetCollection)
+			r.Get("/myself/", h.Myself)
+			r.Post("/logout/", h.Logout)
+			r.Post("/book/", h.PostBook)
 
 			r.Route("/book/{bookId}", func(r chi.Router) {
 				r.Get("/", h.GetBook)
 				r.Delete("/", h.DeleteBook)
+				r.Get("/currentPage/", h.GetCurrentPage)
+				r.Get("/page/{pageId}/audio/", h.GetPageAudio)
+				r.Get("/page/{pageId}/text/", h.GetPageText)
 
 			})
 		})

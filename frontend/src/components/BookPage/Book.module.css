@@ -7,21 +7,25 @@
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  background-color: var(--g-color-base-background);
+  background-color: var(--g-color-base-background, #1a1a1a); /* Темный фон для темной темы */
+  color: var(--g-color-text-primary, #f0f0f0); /* Светлый текст для темной темы */
 }
 
 /* Заголовок книги */
 .bookHeader {
   padding: 16px 24px;
-  border-bottom: 1px solid var(--g-color-line-generic);
-  background-color: var(--g-color-base-background);
+  border-bottom: 1px solid var(--g-color-line-generic, #333333);
+  background-color: var(--g-color-base-background, #1a1a1a);
   flex-shrink: 0;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .bookMeta {
+  flex: 1;
   text-align: center;
-  margin-bottom: 8px;
 }
 
 /* Основное содержание книги */
@@ -30,7 +34,26 @@
   overflow-y: auto;
   padding: 30px;
   position: relative;
-  background-color: var(--g-color-base-background);
+  background-color: var(--g-color-base-background, #1a1a1a);
+  color: var(--g-color-text-primary, #f0f0f0);
+}
+
+/* Для лучшей читаемости в темной теме */
+.bookContent::-webkit-scrollbar {
+  width: 10px;
+}
+
+.bookContent::-webkit-scrollbar-track {
+  background: var(--g-color-base-generic, #2a2a2a);
+}
+
+.bookContent::-webkit-scrollbar-thumb {
+  background: var(--g-color-base-generic-medium, #555555);
+  border-radius: 5px;
+}
+
+.bookContent::-webkit-scrollbar-thumb:hover {
+  background: var(--g-color-base-generic-heavy, #666666);
 }
 
 .pageContent {
@@ -38,43 +61,57 @@
   margin: 0 auto;
   padding: 50px;
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Более темная тень для темной темы */
   min-height: 100%;
-  background-color: white;
+  background-color: var(--g-color-base-float, #2a2a2a); /* Темный фон контента */
+  border: 1px solid var(--g-color-line-generic, #333333);
 }
 
 .bookTitle {
   margin-bottom: 16px;
   text-align: center;
-  color: var(--g-color-text-primary) !important;
+  color: var(--g-color-text-primary, #f0f0f0) !important;
   font-weight: 600;
+  font-size: 2rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .bookAuthor {
   margin-bottom: 40px;
   text-align: center;
   font-style: italic;
-  color: var(--g-color-text-secondary) !important;
+  color: var(--g-color-text-secondary, #cccccc) !important;
+  font-size: 1.2rem;
 }
 
 .textContent {
   text-align: justify;
+  color: var(--g-color-text-primary, #f0f0f0);
 }
 
 .paragraph {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   text-indent: 2em;
-  font-size: 18px;
-  line-height: 1.8;
+  font-size: 19px;
+  line-height: 1.9;
   font-family: 'Georgia', 'Times New Roman', serif;
-  color: var(--g-color-text-primary) !important;
+  color: var(--g-color-text-primary, #f0f0f0) !important;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Улучшение контраста для текста */
+.paragraph::selection {
+  background-color: var(--g-color-base-brand, #4a76a8);
+  color: white;
 }
 
 .pageFooter {
   margin-top: 60px;
   padding-top: 30px;
-  border-top: 1px solid var(--g-color-line-generic);
+  border-top: 1px solid var(--g-color-line-generic, #333333);
   text-align: center;
+  color: var(--g-color-text-secondary, #aaaaaa);
 }
 
 /* Основные кнопки управления - ВСЕГДА ВИДНЫ ВНИЗУ */
@@ -84,9 +121,9 @@
   left: 0;
   right: 0;
   padding: 12px 20px 16px;
-  background-color: var(--g-color-base-background);
-  border-top: 1px solid var(--g-color-line-generic);
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  background-color: var(--g-color-base-background, #1a1a1a);
+  border-top: 1px solid var(--g-color-line-generic, #333333);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3); /* Более темная тень */
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -101,14 +138,15 @@
 }
 
 /* Выбор страницы - ПРЯМО У ЛЕВОГО КРАЯ */
-.leftEdgeControl {
-  margin-left: 0;
-  padding-left: 0;
+.pageSelectorContainer {
   flex-shrink: 0;
 }
 
 .pageSelect {
   min-width: 100px;
+  background-color: var(--g-color-base-background, #1a1a1a);
+  color: var(--g-color-text-primary, #f0f0f0);
+  border: 1px solid var(--g-color-line-generic, #333333);
 }
 
 /* Центральная группа кнопок */
@@ -125,63 +163,75 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  border: 2px solid;
+  border: 2px solid var(--g-color-line-generic, #444444);
   transition: all 0.2s ease;
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  background-color: var(--g-color-base-float, #2a2a2a);
+  color: var(--g-color-text-primary, #f0f0f0);
+}
+
+.navButton:hover:not(:disabled), .playButton:hover:not(:disabled) {
+  transform: scale(1.05);
+  border-color: var(--g-color-base-brand, #4a76a8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  background-color: var(--g-color-base-generic, #333333);
+}
+
+.navButton:disabled, .playButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--g-color-text-secondary, #666666);
+}
+
+.playButton[view="action"] {
+  background-color: var(--g-color-base-brand, #4a76a8);
+  border-color: var(--g-color-base-brand, #4a76a8);
+  color: white;
+}
+
+.playButton[view="action"]:hover:not(:disabled) {
+  background-color: var(--g-color-base-brand-hover, #3a6698);
+  border-color: var(--g-color-base-brand-hover, #3a6698);
 }
 
 .playButton {
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: 70px;
+  background-color: var(--g-color-base-brand, #4a76a8);
+  color: white;
 }
 
-.navButton:hover:not(:disabled), .playButton:hover {
-  transform: scale(1.05);
-  opacity: 0.9;
+.playButton:hover:not(:disabled) {
+  background-color: var(--g-color-base-brand-hover, #3a6698);
 }
 
-.navButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.buttonIcon {
-  font-size: 20px;
-  line-height: 1;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  position: relative;
-  z-index: 1;
-}
-
-.playButton .buttonIcon {
-  font-size: 22px;
-  width: 24px;
-  height: 24px;
-}
-
-.buttonLabel {
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  position: relative;
-  z-index: 1;
+/* Стили для иконок внутри кнопок */
+.navButton svg,
+.playButton svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: currentColor;
 }
 
 /* Прогресс-бар */
 .progressContainer {
   width: 100%;
   margin-top: 8px;
+}
+
+/* Стилизация прогресс-бара для темной темы */
+.progressContainer :global(.g-progress__track) {
+  background-color: var(--g-color-base-generic, #333333);
+}
+
+.progressContainer :global(.g-progress__fill) {
+  background-color: var(--g-color-base-brand, #4a76a8);
 }
 
 /* Состояния загрузки и ошибок */
@@ -192,7 +242,8 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  background-color: var(--g-color-base-background);
+  background-color: var(--g-color-base-background, #1a1a1a);
+  color: var(--g-color-text-primary, #f0f0f0);
 }
 
 .noContent {
@@ -203,13 +254,38 @@
   justify-content: center;
   padding: 40px;
   text-align: center;
-  background-color: var(--g-color-base-background);
+  background-color: var(--g-color-base-background, #1a1a1a);
+  color: var(--g-color-text-primary, #f0f0f0);
+}
+
+/* Стили для Alert (сообщений об ошибках и информации) */
+:global(.g-alert) {
+  background-color: var(--g-color-base-float, #2a2a2a) !important;
+  border-color: var(--g-color-line-generic, #333333) !important;
+  color: var(--g-color-text-primary, #f0f0f0) !important;
+}
+
+:global(.g-alert__title) {
+  color: var(--g-color-text-primary, #f0f0f0) !important;
+}
+
+/* Стили для Modal (модальных окон) */
+:global(.g-modal__content) {
+  background-color: var(--g-color-base-float, #2a2a2a) !important;
+  color: var(--g-color-text-primary, #f0f0f0) !important;
+}
+
+:global(.g-modal__footer) {
+  border-top-color: var(--g-color-line-generic, #333333) !important;
+  background-color: var(--g-color-base-float, #2a2a2a) !important;
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
   .bookHeader {
     padding: 12px 16px;
+    flex-direction: column;
+    gap: 12px;
   }
   
   .bookContent {
@@ -218,11 +294,23 @@
   
   .pageContent {
     padding: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+  
+  .bookTitle {
+    font-size: 1.7rem;
+    margin-bottom: 12px;
+  }
+  
+  .bookAuthor {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
   }
   
   .paragraph {
-    font-size: 16px;
-    line-height: 1.6;
+    font-size: 17px;
+    line-height: 1.7;
+    margin-bottom: 24px;
   }
   
   .playerControls {
@@ -234,7 +322,7 @@
     gap: 15px;
   }
   
-  .leftEdgeControl {
+  .pageSelectorContainer {
     width: 100%;
     display: flex;
     justify-content: center;
@@ -252,21 +340,19 @@
   }
   
   .navButton, .playButton {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .navButton svg,
+  .playButton svg {
+    width: 18px;
+    height: 18px;
   }
   
   .playButton {
-    width: 70px;
-    height: 70px;
-  }
-  
-  .buttonIcon {
-    font-size: 18px;
-  }
-  
-  .playButton .buttonIcon {
-    font-size: 20px;
+    width: 60px;
+    height: 60px;
   }
 }
 
@@ -279,7 +365,7 @@
     gap: 12px;
   }
   
-  .leftEdgeControl {
+  .pageSelectorContainer {
     margin-bottom: 8px;
   }
   
@@ -292,25 +378,50 @@
   }
   
   .navButton, .playButton {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .navButton svg,
+  .playButton svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .playButton {
     width: 55px;
     height: 55px;
   }
   
-  .playButton {
-    width: 65px;
-    height: 65px;
-  }
-  
-  .buttonIcon {
+  .paragraph {
     font-size: 16px;
-    margin-bottom: 4px;
+    line-height: 1.6;
   }
   
-  .playButton .buttonIcon {
-    font-size: 18px;
+  .pageContent {
+    padding: 20px;
   }
-  
-  .buttonLabel {
-    font-size: 10px;
-  }
+}
+
+/* Дополнительные улучшения для темной темы */
+.bookHeader button {
+  background-color: var(--g-color-base-float, #2a2a2a);
+  color: var(--g-color-text-primary, #f0f0f0);
+  border: 1px solid var(--g-color-line-generic, #333333);
+}
+
+.bookHeader button:hover:not(:disabled) {
+  background-color: var(--g-color-base-generic, #333333);
+  border-color: var(--g-color-line-generic-heavy, #444444);
+}
+
+/* Улучшенный контраст для текста при выделении */
+::selection {
+  background-color: var(--g-color-base-brand, #4a76a8);
+  color: white;
+}
+
+::-moz-selection {
+  background-color: var(--g-color-base-brand, #4a76a8);
+  color: white;
 }

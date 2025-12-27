@@ -2,34 +2,46 @@
   padding: 0;
   max-width: 100%;
   margin: 0;
-  min-height: 100vh;
+  min-height: calc(100vh - 60px); /* Учитываем футер */
   display: flex;
   flex-direction: row;
   overflow: hidden;
 }
 
-/* Боковая панель с книгами (как чаты в Telegram) */
+/* Боковая панель с книгами - более компактная */
 .sidebar {
-  width: 320px;
-  min-width: 280px;
-  max-width: 400px;
+  width: 280px;
+  min-width: 250px;
+  max-width: 320px;
   border-right: 1px solid var(--g-color-line-generic);
   background-color: var(--g-color-base-background);
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - 60px);
   overflow: hidden;
   flex-shrink: 0;
 }
 
 .sidebarHeader {
-  padding: 20px 16px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--g-color-line-generic);
   flex-shrink: 0;
 }
 
+.sidebarHeader h2 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+}
+
+.bookCount {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 12px;
+  display: block;
+}
+
 .searchInput {
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .sidebarContent {
@@ -39,13 +51,13 @@
 }
 
 .bookItem {
-  padding: 16px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--g-color-line-generic);
   cursor: pointer;
   transition: background-color 0.2s;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .bookItem:hover {
@@ -58,27 +70,29 @@
 }
 
 .bookCover {
-  width: 48px;
-  height: 64px;
+  width: 40px;
+  height: 52px;
   background: linear-gradient(135deg, var(--g-color-base-brand), var(--g-color-base-brand-heavy));
-  border-radius: 4px;
+  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: bold;
   flex-shrink: 0;
 }
 
 .bookInfo {
   flex: 1;
-  min-width: 0; /* Для корректного обрезания текста */
+  min-width: 0;
+  overflow: hidden;
 }
 
 .bookTitle {
   font-weight: 500;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -86,29 +100,39 @@
 
 .bookAuthor {
   color: var(--g-color-text-secondary);
-  font-size: 14px;
+  font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Основная область с плеером */
+/* Основная область с плеером - более компактная */
 .mainArea {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - 60px);
   overflow: hidden;
   background-color: var(--g-color-base-background);
 }
 
 .mainHeader {
-  padding: 16px 24px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--g-color-line-generic);
   flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-height: 56px;
+}
+
+.mainHeader h2 {
+  margin: 0;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
 }
 
 .readerContainer {
@@ -126,38 +150,81 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 20px;
   text-align: center;
-  gap: 24px;
+  gap: 16px;
 }
 
 .welcomeIllustration {
-  font-size: 120px;
+  font-size: 60px;
   color: var(--g-color-base-brand);
-  margin-bottom: 20px;
+  margin-bottom: 12px;
+}
+
+.welcomeText {
+  font-size: 14px;
+  line-height: 1.4;
+  max-width: 400px;
+}
+
+/* Стили для загрузки и ошибок */
+.loadingState, .errorState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 
 /* Адаптивность */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 240px;
+    min-width: 220px;
+  }
+}
+
 @media (max-width: 768px) {
   .wrapper {
     flex-direction: column;
+    min-height: calc(100vh - 60px);
   }
   
   .sidebar {
     width: 100%;
     max-width: 100%;
-    height: auto;
-    max-height: 50vh;
+    height: 200px;
+    max-height: 200px;
     border-right: none;
     border-bottom: 1px solid var(--g-color-line-generic);
   }
   
   .mainArea {
-    height: auto;
-    min-height: 50vh;
+    height: calc(100vh - 260px); /* Вычитаем высоту сайдбара и футера */
+    min-height: 300px;
   }
   
   .welcomeIllustration {
-    font-size: 80px;
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    height: 180px;
+  }
+  
+  .mainArea {
+    height: calc(100vh - 240px);
+  }
+  
+  .sidebarHeader,
+  .mainHeader {
+    padding: 10px 12px;
+  }
+  
+  .bookItem {
+    padding: 8px 12px;
   }
 }

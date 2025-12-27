@@ -4,11 +4,13 @@ import {
     Text,
     TextInput,
     Card,
+    Icon,
 } from "@gravity-ui/uikit";
 import styles from "./Collection.module.css";
 import { useState } from "react";
 import { observer } from "mobx-react";
 import { bookStore } from "../../store/BookStore";
+import { TrashBin } from "@gravity-ui/icons";
 
 type Props = {};
 
@@ -17,21 +19,43 @@ export const Collection: React.FC<Props> = observer(() => {
     const [author, setAuthor] = useState("");
     const [file, setFile] = useState<File | undefined>(undefined);
     const [search, setSearch] = useState("");
+    const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
     const handleAddBook = async () => {
         if (!title || !author) return;
-        await bookStore.addBook({
-            title,
-            author,
-            file,
-            fileName: file ? file.name : undefined,
-            fileUrl: file ? URL.createObjectURL(file) : undefined,
-        });
-        setTitle("");
-        setAuthor("");
-        setFile(undefined);
-        const fileInput = document.getElementById("book-file") as HTMLInputElement;
-        if (fileInput) fileInput.value = "";
+        try {
+            await bookStore.addBook({
+                title,
+                author,
+                file,
+                fileName: file ? file.name : undefined,
+                fileUrl: file ? URL.createObjectURL(file) : undefined,
+            });
+            setTitle("");
+            setAuthor("");
+            setFile(undefined);
+            const fileInput = document.getElementById("book-file") as HTMLInputElement;
+            if (fileInput) fileInput.value = "";
+        } catch (error: any) {
+            console.error("Ошибка при добавлении книги:", error);
+        }
+    };
+
+    const handleDeleteBook = async (bookId: string) => {
+        if (!bookId) return;
+        
+        try {
+            setDeletingIds(prev => new Set([...prev, bookId]));
+            await bookStore.removeBook(bookId);
+        } catch (error: any) {
+            console.error("Ошибка при удалении книги:", error);
+        } finally {
+            setDeletingIds(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(bookId);
+                return newSet;
+            });
+        }
     };
 
     const filteredBooks = bookStore.books.filter(
@@ -58,10 +82,12 @@ export const Collection: React.FC<Props> = observer(() => {
                     disabled={!title || !author || bookStore.isLoading}
                     onClick={handleAddBook}
                     style={{ flexShrink: 0 }}
+                    loading={bookStore.isLoading}
                 >
                     Добавить книгу
                 </Button>
             </Flex>
+            
             <Flex alignItems="center" gap="4" wrap>
                 <TextInput
                     label="Название книги"
@@ -100,7 +126,6 @@ export const Collection: React.FC<Props> = observer(() => {
                 >
                     {file ? file.name : "📄 Прикрепить файл"}
                 </Button>
-
             </Flex>
 
             <Flex direction="column" gap="4" className={styles.bookList}>
@@ -111,24 +136,36 @@ export const Collection: React.FC<Props> = observer(() => {
                 ) : (
                     filteredBooks.map((book, index) => (
                         <Card key={book._id || book.bookId || index} className={styles.bookCard}>
-                            <Flex direction="column" gap="1">
-                                <Text variant="header-2">{book.title || "Без названия"}</Text>
-                                <Text variant="body-2" color="secondary">
-                                    Автор: {book.author || "Неизвестен"}
-                                </Text>
-                                {book.fileName && (
-                                    <Button
-                                        view="outlined"
-                                        size="m"
-                                        width="max"
-                                        onClick={() => {
-                                            if (book.fileUrl)
-                                                window.open(book.fileUrl);
-                                        }}
-                                    >
-                                        Открыть файл ({book.fileName})
-                                    </Button>
-                                )}
+                            <Flex justifyContent="space-between" alignItems="flex-start" gap="3">
+                                <Flex direction="column" gap="1" style={{ flex: 1 }}>
+                                    <Text variant="header-2">{book.title || "Без названия"}</Text>
+                                    <Text variant="body-2" color="secondary">
+                                        Автор: {book.author || "Неизвестен"}
+                                    </Text>
+                                    {book.fileName && (
+                                        <Button
+                                            view="outlined"
+                                            size="m"
+                                            width="max"
+                                            onClick={() => {
+                                                if (book.fileUrl)
+                                                    window.open(book.fileUrl);
+                                            }}
+                                            style={{ marginTop: 8 }}
+                                        >
+                                            Открыть файл ({book.fileName})
+                                        </Button>
+                                    )}
+                                </Flex>
+                                <Button
+                                    view="outlined-danger"
+                                    size="m"
+                                    onClick={() => handleDeleteBook(book._id || book.bookId || "")}
+                                    disabled={deletingIds.has(book._id || book.bookId || "")}
+                                    loading={deletingIds.has(book._id || book.bookId || "")}
+                                >
+                                    <Icon data={TrashBin} size={16} />
+                                </Button>
                             </Flex>
                         </Card>
                     ))
@@ -137,3 +174,6 @@ export const Collection: React.FC<Props> = observer(() => {
         </Flex>
     );
 });
+
+// Экспорт по умолчанию
+export default Collection;

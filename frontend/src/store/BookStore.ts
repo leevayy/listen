@@ -2,66 +2,18 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import { getCollection, createBook, deleteBook } from '../api/fetchers';
 import type { Book } from '../api/types';
 
+// Создаем расширенный тип для книг с флагом демо
+interface DemoBook extends Book {
+  isDemo?: boolean;
+}
+
 // Тестовые книги для демонстрации
-const demoBooks: Book[] = [
-  {
-    _id: '1',
-    bookId: '1',
-    bookTitle: 'Мастер и Маргарита',
-    title: 'Мастер и Маргарита',
-    author: 'Михаил Булгаков',
-    fileName: 'master-i-margarita.pdf',
-    fileUrl: '#'
-  },
-  {
-    _id: '2',
-    bookId: '2',
-    bookTitle: '1984',
-    title: '1984',
-    author: 'Джордж Оруэлл',
-    fileName: '1984.pdf',
-    fileUrl: '#'
-  },
-  {
-    _id: '3',
-    bookId: '3',
-    bookTitle: 'Преступление и наказание',
-    title: 'Преступление и наказание',
-    author: 'Фёдор Достоевский',
-    fileName: 'crime-and-punishment.pdf',
-    fileUrl: '#'
-  },
-  {
-    _id: '4',
-    bookId: '4',
-    bookTitle: 'Война и мир',
-    title: 'Война и мир',
-    author: 'Лев Толстой',
-    fileName: 'war-and-peace.pdf',
-    fileUrl: '#'
-  },
-  {
-    _id: '5',
-    bookId: '5',
-    bookTitle: 'Маленький принц',
-    title: 'Маленький принц',
-    author: 'Антуан де Сент-Экзюпери',
-    fileName: 'little-prince.pdf',
-    fileUrl: '#'
-  },
-  {
-    _id: '6',
-    bookId: '6',
-    bookTitle: 'Гарри Поттер и философский камень',
-    title: 'Гарри Поттер и философский камень',
-    author: 'Джоан Роулинг',
-    fileName: 'harry-potter.pdf',
-    fileUrl: '#'
-  }
+const demoBooks: DemoBook[] = [
+  
 ];
 
 class BookStore {
-  books: Book[] = [...demoBooks]; // Начинаем с демо-книг
+  books: DemoBook[] = [...demoBooks];
   isLoading = false;
   error: string | null = null;
 
@@ -70,31 +22,68 @@ class BookStore {
     this.loadBooks();
   }
 
-  // Загрузить все книги
   loadBooks = async () => {
-    this.isLoading = true;
-    this.error = null;
+  this.isLoading = true;
+  this.error = null;
+  
+  try {
+    console.log("🔄 BookStore: Загрузка коллекции книг...");
+    const response = await getCollection();
+    console.log("📦 BookStore: Ответ от API:", response);
     
-    try {
-      console.log("Загрузка коллекции книг...");
-      const response = await getCollection();
-      console.log("Получены книги с сервера:", response);
-      runInAction(() => {
-        // Объединяем демо-книги с книгами с сервера
-        const serverBooks = response.collection.books || [];
-        this.books = [...demoBooks, ...serverBooks];
-        this.isLoading = false;
+    runInAction(() => {
+      const serverBooks = response.collection?.books || [];
+      console.log(`📚 BookStore: Получено ${serverBooks.length} книг с сервера`);
+      
+      // Добавляем флаг isDemo: false для книг с сервера
+      const serverBooksWithFlag: DemoBook[] = serverBooks.map(book => ({
+        ...book,
+        title: book.bookTitle || book.title || 'Без названия',
+        author: book.author || 'Неизвестный автор',
+        isDemo: false
+      }));
+      
+      console.log("🎨 BookStore: Обработанные серверные книги:", serverBooksWithFlag);
+      
+      // Объединяем книги
+      const allBooksMap = new Map<string, DemoBook>();
+      
+      // Сначала добавляем серверные книги
+      serverBooksWithFlag.forEach(book => {
+        const id = book._id || book.bookId;
+        if (id) {
+          allBooksMap.set(id, book);
+          console.log(`➕ Добавлена серверная книга: ${book.title} (${id})`);
+        }
       });
-    } catch (error: any) {
-      console.warn("Сервер недоступен, используем демо-книги:", error.message);
-      runInAction(() => {
+      
+      // Затем добавляем демо-книги
+      demoBooks.forEach(book => {
+        const id = book._id || book.bookId;
+        if (id && !allBooksMap.has(id)) {
+          allBooksMap.set(id, book);
+          console.log(`➕ Добавлена демо-книга: ${book.title} (${id})`);
+        }
+      });
+      
+      this.books = Array.from(allBooksMap.values());
+      this.isLoading = false;
+      console.log(`🏁 BookStore: Всего ${this.books.length} книг в коллекции`);
+    });
+  } catch (error: any) {
+    console.error("❌ BookStore: Ошибка загрузки:", error);
+    runInAction(() => {
+      if (error.message !== 'Требуется авторизация') {
         this.error = `Сервер временно недоступен. Используются демо-данные. (${error.message})`;
-        this.isLoading = false;
-      });
-    }
-  };
+        console.log("ℹ️ BookStore: Используем демо-книги из-за ошибки");
+      }
+      this.isLoading = false;
+    });
+  }
+};
 
-  // Добавить книгу
+  // ... остальные методы остаются без изменений ...
+  
   addBook = async (bookData: {
     title: string;
     author?: string;
@@ -107,19 +96,18 @@ class BookStore {
     this.error = null;
     
     try {
-      // Используем bookTitle как обязательное поле для бэкенда
-      const response = await createBook(bookData.title, bookData.file);
+      const response = await createBook(bookData.title, bookData.author, bookData.file);
       console.log("Ответ от сервера при создании книги:", response);
       
       const newBook = response.book;
       
-      // Добавляем дополнительные поля для совместимости с фронтендом
-      const enhancedBook: Book = {
+      const enhancedBook: DemoBook = {
         ...newBook,
         title: newBook.bookTitle || newBook.title || bookData.title || 'Без названия',
         author: bookData.author || newBook.author || '',
         fileName: bookData.file?.name || newBook.fileName,
         fileUrl: bookData.fileUrl || newBook.fileUrl,
+        isDemo: false
       };
       
       console.log("Улучшенная книга:", enhancedBook);
@@ -133,20 +121,29 @@ class BookStore {
     } catch (error: any) {
       console.error("Ошибка добавления книги:", error);
       
-      // Если сервер недоступен, добавляем локально как демо-книгу
-      const demoBook: Book = {
-        _id: Date.now().toString(),
-        bookId: Date.now().toString(),
+      if (error.message === 'Требуется авторизация') {
+        throw error;
+      }
+      
+      // Если сервер недоступен, добавляем локально
+      const localId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const demoBook: DemoBook = {
+        _id: localId,
+        bookId: localId,
         bookTitle: bookData.title,
         title: bookData.title,
         author: bookData.author || 'Неизвестен',
-        fileName: bookData.file?.name || bookData.fileName,
+        fileName: bookData.file?.name || bookData.fileName || `${bookData.title.replace(/\s+/g, '_')}.pdf`,
         fileUrl: bookData.fileUrl || '#',
+        isDemo: true
       };
       
       runInAction(() => {
         this.books.push(demoBook);
-        this.error = `Сервер недоступен. Книга добавлена локально.`;
+        this.error = error.status === 500 
+          ? `Сервер временно недоступен. Книга "${bookData.title}" добавлена локально.`
+          : `Проблема с соединением. Книга "${bookData.title}" добавлена локально.`;
         this.isLoading = false;
       });
       
@@ -154,12 +151,23 @@ class BookStore {
     }
   };
 
-  // Удалить книгу
   removeBook = async (bookId: string) => {
     this.isLoading = true;
     this.error = null;
     
     try {
+      // Проверяем, не демо ли это книга
+      const book = this.getBookById(bookId);
+      if (book?.isDemo) {
+        // Для демо-книг просто удаляем локально
+        runInAction(() => {
+          this.books = this.books.filter(book => book._id !== bookId && book.bookId !== bookId);
+          this.isLoading = false;
+        });
+        return;
+      }
+      
+      // Для реальных книг удаляем с сервера
       await deleteBook(bookId);
       runInAction(() => {
         this.books = this.books.filter(book => book._id !== bookId && book.bookId !== bookId);
@@ -174,7 +182,6 @@ class BookStore {
     }
   };
 
-  // Поиск книг (локальный поиск)
   searchBooks = (query: string) => {
     if (!query.trim()) {
       return this.books;
@@ -188,20 +195,17 @@ class BookStore {
     });
   };
 
-  // Получить книгу по ID
   getBookById = (id: string) => {
     return this.books.find(book => book._id === id || book.bookId === id);
   };
 
-  // Обновить локальные данные книги
-  updateBookLocal = (bookId: string, updates: Partial<Book>) => {
+  updateBookLocal = (bookId: string, updates: Partial<DemoBook>) => {
     const index = this.books.findIndex(book => book._id === bookId || book.bookId === bookId);
     if (index !== -1) {
       this.books[index] = { ...this.books[index], ...updates };
     }
   };
 
-  // Очистить ошибку
   clearError = () => {
     this.error = null;
   };

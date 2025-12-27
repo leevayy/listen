@@ -31,8 +31,10 @@ export type Book = {
   author?: string;
   fileName?: string;
   fileUrl?: string;
+  bookUrl?: string; // Добавьте это свойство
   createdAt?: string;
   updatedAt?: string;
+  isDemo?: boolean;
 };
 
 export type CollectionResponse = {
@@ -48,3 +50,20 @@ export type BookResponse = {
 export type DeleteResponse = {
   message: string;
 };
+
+// Новые типы для работы с текущей страницей книги
+export type CurrentPageInfo = {
+  pageId: number;
+  previousPageId?: number;
+  nextPageId?: number;
+};
+
+export type CurrentPageText = {
+  text: string;
+};
+
+export type FinishedPageRequest = {
+  bookId: string;
+  pageId: number;
+};
+

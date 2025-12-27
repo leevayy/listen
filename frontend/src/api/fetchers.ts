@@ -203,9 +203,9 @@ export const logout = async (): Promise<void> => {
 export const getCollection = async (): Promise<CollectionResponse> => {
   const sessionId = getSessionId();
   
-  console.log(`📚 [API] Запрос коллекции книг...`);
-  console.log(`🔑 Session ID: ${sessionId.substring(0, 8)}...`);
-  console.log(`🌐 URL: ${API_BASE_URL}collection/`);
+  console.log(` [API] Запрос коллекции книг...`);
+  console.log(` Session ID: ${sessionId.substring(0, 8)}...`);
+  console.log(` URL: ${API_BASE_URL}collection/`);
   
   try {
     // Создаем AbortController для таймаута
@@ -223,15 +223,15 @@ export const getCollection = async (): Promise<CollectionResponse> => {
 
     clearTimeout(timeoutId);
     
-    console.log(`📥 [API] Статус ответа: ${response.status} ${response.statusText}`);
+    console.log(` [API] Статус ответа: ${response.status} ${response.statusText}`);
     
     // Получаем текст ответа
     const responseText = await response.text();
-    console.log(`📄 Тело ответа (первые 500 символов):`, responseText.substring(0, 500));
+    console.log(` Тело ответа (первые 500 символов):`, responseText.substring(0, 500));
     
     // Пробуем определить тип ответа
     if (!responseText.trim()) {
-      console.log('ℹ️ [API] Пустой ответ от сервера');
+      console.log(' [API] Пустой ответ от сервера');
       return {
         collection: {
           books: []
@@ -243,15 +243,15 @@ export const getCollection = async (): Promise<CollectionResponse> => {
     let data;
     try {
       data = JSON.parse(responseText);
-      console.log('✅ [API] Успешно распарсен JSON');
+      console.log(' [API] Успешно распарсен JSON');
     } catch (parseError) {
-      console.error('❌ [API] Не удалось распарсить как JSON');
-      console.log('ℹ️ [API] Ответ может быть HTML или другим форматом');
+      console.error(' [API] Не удалось распарсить как JSON');
+      console.log(' [API] Ответ может быть HTML или другим форматом');
       
       // Проверяем, не HTML ли это
       if (responseText.toLowerCase().includes('<!doctype') || 
           responseText.toLowerCase().includes('<html')) {
-        console.error('⚠️ [API] Сервер вернул HTML вместо JSON (возможно ошибка 500 или редирект)');
+        console.error(' [API] Сервер вернул HTML вместо JSON (возможно ошибка 500 или редирект)');
       }
       
       // Проверяем статус ответа
@@ -268,24 +268,24 @@ export const getCollection = async (): Promise<CollectionResponse> => {
     
     // Проверяем структуру данных
     if (data.collection && Array.isArray(data.collection.books)) {
-      console.log(`📚 [API] Получено ${data.collection.books.length} книг`);
+      console.log(` [API] Получено ${data.collection.books.length} книг`);
       return data;
     } else if (Array.isArray(data.books)) {
-      console.log(`📚 [API] Получено ${data.books.length} книг (альтернативная структура)`);
+      console.log(` [API] Получено ${data.books.length} книг (альтернативная структура)`);
       return {
         collection: {
           books: data.books
         }
       };
     } else if (Array.isArray(data)) {
-      console.log(`📚 [API] Получен массив из ${data.length} книг`);
+      console.log(` [API] Получен массив из ${data.length} книг`);
       return {
         collection: {
           books: data
         }
       };
     } else {
-      console.warn('⚠️ [API] Неожиданная структура ответа:', data);
+      console.warn(' [API] Неожиданная структура ответа:', data);
       return {
         collection: {
           books: []
@@ -293,10 +293,10 @@ export const getCollection = async (): Promise<CollectionResponse> => {
       };
     }
   } catch (error: any) {
-    console.error('💥 [API] Ошибка запроса коллекции:', error);
+    console.error(' [API] Ошибка запроса коллекции:', error);
     
     if (error.name === 'AbortError') {
-      console.error('⏰ [API] Таймаут запроса коллекции');
+      console.error(' [API] Таймаут запроса коллекции');
       throw new Error('Таймаут запроса к серверу');
     }
     

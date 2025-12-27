@@ -7,16 +7,23 @@ import { userStore } from "../store";
 import { pages } from "../pages/pages";
 import { useEffect } from "react";
 
-
 export const App: React.FC = observer(() => {
     const { authLogin: login } = userStore;
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
-        if (!login) {
-            navigate(pages.auth);
-        }
+        const login = async () => {
+            await userStore.myself();
+
+            if (!login) {
+                navigate(pages.auth);
+            }
+
+            if (userStore.state === "intial") {
+                login();
+            }
+        };
     }, [login]);
 
     return (

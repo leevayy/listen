@@ -22,6 +22,8 @@ import {
 import { logout } from '../../api/fetchers'; // Импортируем функцию логаута
 import type { UserProfile } from '../../types/user';
 import styles from './Profile.module.css';
+import { observer } from 'mobx-react';
+import { userStore } from '../../store';
 
 type ProfileProps = {
   user: UserProfile;
@@ -29,7 +31,7 @@ type ProfileProps = {
   onCancel?: () => void;
 };
 
-export const Profile: React.FC<ProfileProps> = ({
+export const Profile: React.FC<ProfileProps> = observer(({
   user,
   onSave,
   onCancel
@@ -38,6 +40,7 @@ export const Profile: React.FC<ProfileProps> = ({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false); // Добавляем состояние для логаута
   const [editedUser, setEditedUser] = useState<UserProfile>({ ...user });
+  const { login } = userStore;
 
   // Проверяем авторизацию при загрузке компонента
   useEffect(() => {
@@ -209,7 +212,7 @@ export const Profile: React.FC<ProfileProps> = ({
                     disabled={isLoggingOut}
                   />
                 ) : (
-                  <Text variant="header-2">{user.username}</Text>
+                  <Text variant="header-2">{login}</Text>
                 )}
                 <Text variant="caption-1" color="secondary">
                   Участник с {user.joinDate}
@@ -471,4 +474,4 @@ export const Profile: React.FC<ProfileProps> = ({
       </Flex>
     </Flex>
   );
-};
+});

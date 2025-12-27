@@ -27,13 +27,13 @@ class BookStore {
   this.error = null;
   
   try {
-    console.log("🔄 BookStore: Загрузка коллекции книг...");
+    console.log(" BookStore: Загрузка коллекции книг...");
     const response = await getCollection();
-    console.log("📦 BookStore: Ответ от API:", response);
+    console.log(" BookStore: Ответ от API:", response);
     
     runInAction(() => {
       const serverBooks = response.collection?.books || [];
-      console.log(`📚 BookStore: Получено ${serverBooks.length} книг с сервера`);
+      console.log(` BookStore: Получено ${serverBooks.length} книг с сервера`);
       
       // Добавляем флаг isDemo: false для книг с сервера
       const serverBooksWithFlag: DemoBook[] = serverBooks.map(book => ({
@@ -43,7 +43,7 @@ class BookStore {
         isDemo: false
       }));
       
-      console.log("🎨 BookStore: Обработанные серверные книги:", serverBooksWithFlag);
+      console.log(" BookStore: Обработанные серверные книги:", serverBooksWithFlag);
       
       // Объединяем книги
       const allBooksMap = new Map<string, DemoBook>();
@@ -53,7 +53,7 @@ class BookStore {
         const id = book._id || book.bookId;
         if (id) {
           allBooksMap.set(id, book);
-          console.log(`➕ Добавлена серверная книга: ${book.title} (${id})`);
+          console.log(` Добавлена серверная книга: ${book.title} (${id})`);
         }
       });
       
@@ -62,20 +62,20 @@ class BookStore {
         const id = book._id || book.bookId;
         if (id && !allBooksMap.has(id)) {
           allBooksMap.set(id, book);
-          console.log(`➕ Добавлена демо-книга: ${book.title} (${id})`);
+          console.log(` Добавлена демо-книга: ${book.title} (${id})`);
         }
       });
       
       this.books = Array.from(allBooksMap.values());
       this.isLoading = false;
-      console.log(`🏁 BookStore: Всего ${this.books.length} книг в коллекции`);
+      console.log(` BookStore: Всего ${this.books.length} книг в коллекции`);
     });
   } catch (error: any) {
-    console.error("❌ BookStore: Ошибка загрузки:", error);
+    console.error(" BookStore: Ошибка загрузки:", error);
     runInAction(() => {
       if (error.message !== 'Требуется авторизация') {
         this.error = `Сервер временно недоступен. Используются демо-данные. (${error.message})`;
-        console.log("ℹ️ BookStore: Используем демо-книги из-за ошибки");
+        console.log(" BookStore: Используем демо-книги из-за ошибки");
       }
       this.isLoading = false;
     });

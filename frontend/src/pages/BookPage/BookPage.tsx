@@ -134,7 +134,7 @@ export const BookPage: React.FC = observer(() => {
       {/* Боковая панель с книгами */}
       <div className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
-          <Text variant="header-2">📚 Мои книги</Text>
+          <Text variant="header-2"> Мои книги</Text>
           <Text variant="caption-1" className={styles.bookCount}>
             {bookStore.books.length} книг в коллекции
           </Text>
@@ -222,7 +222,7 @@ export const BookPage: React.FC = observer(() => {
       <div className={styles.mainArea}>
         <div className={styles.mainHeader}>
           <Text variant="header-2">
-            {selectedBook ? `📖 ${selectedBook.bookTitle} ${selectedBook.isDemo ? '(демо)' : ''}` : 'Читалка книг'}
+            {selectedBook ? ` ${selectedBook.bookTitle} ${selectedBook.isDemo ? '(демо)' : ''}` : 'Читалка книг'}
           </Text>
           <div>
             {selectedBook && (
@@ -274,7 +274,7 @@ export const BookPage: React.FC = observer(() => {
             />
           ) : (
             <div className={styles.noBookSelected}>
-              <div className={styles.welcomeIllustration}>📚</div>
+              <div className={styles.welcomeIllustration}></div>
               <Text variant="header-2">Добро пожаловать в читалку!</Text>
               <Text variant="body-2" color="secondary" className={styles.welcomeText}>
                 Выберите книгу из списка слева, чтобы начать чтение.

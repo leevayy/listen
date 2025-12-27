@@ -7,7 +7,7 @@ import {
     Icon,
 } from "@gravity-ui/uikit";
 import styles from "./Collection.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import { bookStore } from "../../store/BookStore";
 import { TrashBin } from "@gravity-ui/icons";
@@ -58,6 +58,10 @@ export const Collection: React.FC<Props> = observer(() => {
         }
     };
 
+    useEffect(() => {
+        bookStore.loadBooks();
+    }, []);
+
     const filteredBooks = bookStore.books.filter(
         (book) =>
             (book.title?.toLowerCase() || "").includes(search.toLowerCase()) ||
@@ -66,7 +70,7 @@ export const Collection: React.FC<Props> = observer(() => {
 
     return (
         <Flex direction="column" className={styles.wrapper} gap="8">
-            <Text variant="header-1">📚 Коллекция книг</Text>
+            <Text variant="header-1"> Коллекция книг</Text>
 
             <Flex justifyContent="space-between" alignItems="center" gap="4">
                 <TextInput
@@ -124,7 +128,7 @@ export const Collection: React.FC<Props> = observer(() => {
                         fileInput?.click();
                     }}
                 >
-                    {file ? file.name : "📄 Прикрепить файл"}
+                    {file ? file.name : " Прикрепить файл"}
                 </Button>
             </Flex>
 
